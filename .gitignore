@@ -1,3 +1,25 @@
 out/
 cache/
 broadcast/
+
+# Dependencies
+/node_modules
+/vendor
+
+# Env and keys
+.env
+.env.backup
+.env.*.local
+*.key
+
+# Builds and storage
+/public/build
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/logs/*
+.phpunit.result.cache
+
+# Databases
+database/*.sqlite
+database/*.sqlite-journal
