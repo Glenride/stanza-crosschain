@@ -1,12 +1,13 @@
 <?php
 
+use App\Http\Controllers\CheckoutController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
-Route::get('/', function () {
-    return Inertia::render('checkout');
-})->name('home');
+Route::get('/', [CheckoutController::class, 'index'])->name('home');
+Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
 
-Route::get('/checkout', function () {
-    return Inertia::render('checkout');
-})->name('checkout');
+Route::post('/api/quote', [CheckoutController::class, 'createQuote'])->name('api.quote');
+Route::get('/api/licenses/{license}', [CheckoutController::class, 'getStatus'])->name('api.license.status');
+Route::get('/api/lookup', [CheckoutController::class, 'resolveHash'])->name('api.lookup');
+
+Route::get('/lookup', [CheckoutController::class, 'lookupPage'])->name('lookup');
