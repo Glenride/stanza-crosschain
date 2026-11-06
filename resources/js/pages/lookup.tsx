@@ -134,7 +134,17 @@ export default function Lookup({ initialQuery = '', license: initialLicense = nu
                                         {license.work?.title || 'Scholarly Work'}
                                     </h2>
                                     <p className="text-xs text-neutral-400">
-                                        Scholar: <span className="text-neutral-200">{license.work?.scholar_name}</span>
+                                        Scholar:{' '}
+                                        {license.work?.scholar_address ? (
+                                            <Link
+                                                href={`/scholar/${license.work.scholar_address}`}
+                                                className="text-emerald-400 hover:underline font-medium"
+                                            >
+                                                {license.work?.scholar_name}
+                                            </Link>
+                                        ) : (
+                                            <span className="text-neutral-200">{license.work?.scholar_name}</span>
+                                        )}
                                     </p>
                                 </div>
                                 <div className="text-right">
@@ -151,8 +161,27 @@ export default function Lookup({ initialQuery = '', license: initialLicense = nu
                                     <div className="text-neutral-200 break-all mt-1">{license.buyer_address}</div>
                                 </div>
                                 <div className="bg-neutral-950/60 p-3.5 rounded-lg border border-neutral-850">
-                                    <div className="text-neutral-500 uppercase text-[10px]">Scholar Address (Base)</div>
-                                    <div className="text-neutral-200 break-all mt-1">{license.work?.scholar_address}</div>
+                                    <div className="text-neutral-500 uppercase text-[10px] flex items-center justify-between">
+                                        <span>Scholar Address (Base)</span>
+                                        {license.work?.scholar_address && (
+                                            <Link
+                                                href={`/scholar/${license.work.scholar_address}`}
+                                                className="text-[10px] text-emerald-400 hover:underline lowercase font-sans"
+                                            >
+                                                view portfolio →
+                                            </Link>
+                                        )}
+                                    </div>
+                                    {license.work?.scholar_address ? (
+                                        <Link
+                                            href={`/scholar/${license.work.scholar_address}`}
+                                            className="text-emerald-400 hover:underline break-all mt-1 block"
+                                        >
+                                            {license.work.scholar_address}
+                                        </Link>
+                                    ) : (
+                                        <div className="text-neutral-200 break-all mt-1">—</div>
+                                    )}
                                 </div>
                                 <div className="bg-neutral-950/60 p-3.5 rounded-lg border border-neutral-850">
                                     <div className="text-neutral-500 uppercase text-[10px]">Origin Payment Asset</div>

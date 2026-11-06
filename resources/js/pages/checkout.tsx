@@ -171,10 +171,24 @@ export default function Checkout({ works }: Props) {
                                                     )}
                                                 </div>
                                                 <p className="text-xs text-neutral-400 mt-1">
-                                                    Scholar: <span className="text-neutral-300">{work.scholar_name}</span>
+                                                    Scholar:{' '}
+                                                    <Link
+                                                        href={`/scholar/${work.scholar_address}`}
+                                                        onClick={(e) => e.stopPropagation()}
+                                                        className="text-neutral-300 hover:text-emerald-400 hover:underline"
+                                                    >
+                                                        {work.scholar_name}
+                                                    </Link>
                                                 </p>
                                                 <p className="text-[11px] font-mono text-neutral-500 truncate mt-0.5">
-                                                    Base Address: {work.scholar_address}
+                                                    Base Address:{' '}
+                                                    <Link
+                                                        href={`/scholar/${work.scholar_address}`}
+                                                        onClick={(e) => e.stopPropagation()}
+                                                        className="text-neutral-500 hover:text-emerald-400"
+                                                    >
+                                                        {work.scholar_address}
+                                                    </Link>
                                                 </p>
                                             </div>
                                         );
@@ -342,9 +356,13 @@ export default function Checkout({ works }: Props) {
                                             </div>
                                             <div className="flex justify-between">
                                                 <span className="text-neutral-500">Scholar Address:</span>
-                                                <span className="text-neutral-200">
+                                                <Link
+                                                    href={`/scholar/${activeWork.scholar_address}`}
+                                                    className="text-emerald-400 hover:underline"
+                                                    title={`View ${activeWork.scholar_name}'s licenses`}
+                                                >
                                                     {activeWork.scholar_address.slice(0, 8)}...{activeWork.scholar_address.slice(-6)}
-                                                </span>
+                                                </Link>
                                             </div>
                                             <div className="flex justify-between">
                                                 <span className="text-neutral-500">Tier:</span>
@@ -377,6 +395,14 @@ export default function Checkout({ works }: Props) {
                                                 </a>
                                                 <div className="mt-2 text-[11px] text-neutral-400">
                                                     Attestation: Scholar recognized on-chain in STANZA credit event.
+                                                </div>
+                                                <div className="mt-3 pt-2.5 border-t border-neutral-800">
+                                                    <Link
+                                                        href={`/scholar/${activeWork.scholar_address}`}
+                                                        className="text-emerald-400 hover:underline text-[11px] inline-flex items-center gap-1"
+                                                    >
+                                                        View Scholar's Complete Portfolio →
+                                                    </Link>
                                                 </div>
                                             </div>
                                         )}

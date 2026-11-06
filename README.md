@@ -186,12 +186,17 @@ php artisan test
   ✓ settle license fails if amount mismatch
   ✓ settle license fails if destination mismatch
 
-  Tests:    11 passed (72 assertions)
+   PASS  Tests\Feature\ScholarTest
+  ✓ scholar page renders with works and licenses
+  ✓ scholar page case insensitive lookup
+  ✓ scholar page empty state for unknown address
+
+  Tests:    14 passed (138 assertions)
 ```
 
 ---
 
-### Step 5: Run the Guest Checkout UI
+### Step 5: Run the Guest Checkout UI & Scholar Portfolio
 
 ```bash
 # Seed 3 placeholder scholarly manuscripts
@@ -207,6 +212,7 @@ php artisan serve
 Visit:
 - **Checkout:** `http://localhost:8000/` (or `http://localhost:8000/checkout`)
 - **License Lookup:** `http://localhost:8000/lookup`
+- **Scholar Portfolio:** `http://localhost:8000/scholar/0x5C10a12345678901234567890123456789012345`
 
 ---
 
@@ -214,7 +220,9 @@ Visit:
 
 ```
 ├── app/
-│   ├── Http/Controllers/CheckoutController.php  # Guest checkout & license lookup
+│   ├── Http/Controllers/
+│   │   ├── CheckoutController.php               # Guest checkout & license lookup
+│   │   └── ScholarController.php                # Read-only scholar portfolio & ledger
 │   ├── Jobs/
 │   │   ├── RequestLicenseQuote.php              # 1Click quote agent job
 │   │   ├── WatchSettlement.php                  # Inbound payment watcher
@@ -226,12 +234,13 @@ Visit:
 │       ├── OneClickService.php                  # NEAR Intents 1Click integration
 │       └── MpcSettlementService.php             # NEAR MPC + Base RPC relay
 ├── docs/antigravity/
-│   ├── README.md                                # Six hackathon work orders
+│   ├── README.md                                # Hackathon work orders (1-7)
 │   └── SCOPE.md                                 # Frozen hackathon scope
 ├── resources/js/
 │   └── pages/
 │       ├── checkout.tsx                         # Guest checkout & quote tracker
-│       └── lookup.tsx                           # On-chain proof & BaseScan lookup
+│       ├── lookup.tsx                           # On-chain proof & BaseScan lookup
+│       └── scholar.tsx                          # Scholar attribution & license ledger
 ├── script/
 │   └── DeployLicenseRegistry.s.sol              # Foundry Base deploy script
 ├── scripts/

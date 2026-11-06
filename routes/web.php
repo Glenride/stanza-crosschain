@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\ScholarController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [CheckoutController::class, 'index'])->name('home');
@@ -11,3 +12,4 @@ Route::get('/api/licenses/{license}', [CheckoutController::class, 'getStatus'])-
 Route::get('/api/lookup', [CheckoutController::class, 'resolveHash'])->name('api.lookup');
 
 Route::get('/lookup', [CheckoutController::class, 'lookupPage'])->name('lookup');
+Route::get('/scholar/{address}', [ScholarController::class, 'show'])->name('scholar.show');

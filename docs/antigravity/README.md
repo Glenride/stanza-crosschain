@@ -33,6 +33,9 @@ Foundry deploy script for LicenseRegistry to Base (chain 8453), constructor arg 
 ## Order 6 — README for AI judges (branch: `antigravity/readme`)
 README per `SCOPE.md`: "do X → see Y" steps, NEAR features named explicitly (1Click + Chain Signatures), contract addresses + links (fill after Friday's deploy), security story stated plainly (no EVM private key, MPC signing, onlyRelayer, replay protection). Draft it now from the scope + contract; addresses get filled in after deploy. Done when: a cold reader can follow it from clone to a settled license.
 
+## Order 7 — Scholar side (branch: `antigravity/scholar-side`)
+Read-only scholar page at `/scholar/{address}` — the scholar's wallet address in the URL, no login, same guest-facing rule as the rest of the app. It lists every license for their works: title, tier, buyer, price, deposit chain, status, when it settled, and the Base settlement transaction with a BaseScan link. Linked from the lookup page and checkout confirmation. STANZA stays recognition only. Full test suite green (`php artisan test`, `forge test`). Lands the section onto `main`.
+
 ## What Antigravity can NOT do (D'Vaughn only)
 - NEAR mainnet account ID + 1Click API key — his gates, still unconfirmed. Nothing live-tests without them.
 - Friday's Base deploy itself (needs the derived relayer address + his go).
