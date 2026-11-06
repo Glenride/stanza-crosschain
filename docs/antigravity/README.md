@@ -36,6 +36,15 @@ README per `SCOPE.md`: "do X → see Y" steps, NEAR features named explicitly (1
 ## Order 7 — Scholar side (branch: `antigravity/scholar-side`)
 Read-only scholar page at `/scholar/{address}` — the scholar's wallet address in the URL, no login, same guest-facing rule as the rest of the app. It lists every license for their works: title, tier, buyer, price, deposit chain, status, when it settled, and the Base settlement transaction with a BaseScan link. Linked from the lookup page and checkout confirmation. STANZA stays recognition only. Full test suite green (`php artisan test`, `forge test`). Lands the section onto `main`.
 
+## Order 8 — Catalog completion (work on `main`, no code changes expected)
+Tests, re-seed, delete the old placeholder rows. Full instructions:
+`docs/antigravity/ORDER-08-catalog-completion.md`. The 3 placeholders
+(Vance, Thorne, Rostova) are replaced on `main` by D'Vaughn's own 3
+manuscripts (`docs/manuscripts/`); the seeder is slug-keyed, so re-seeding
+adds the new works but does not delete the old rows — the deletion is the
+job. Done when: `php artisan test` green, seed ran, works table holds
+exactly the 3 manuscripts, all 3 manuscript links return 200.
+
 ## What Antigravity can NOT do (D'Vaughn only)
 - NEAR mainnet account ID + 1Click API key — his gates, still unconfirmed. Nothing live-tests without them.
 - Friday's Base deploy itself (needs the derived relayer address + his go).

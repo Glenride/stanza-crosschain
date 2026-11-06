@@ -199,7 +199,7 @@ php artisan test
 ### Step 5: Run the Guest Checkout UI & Scholar Portfolio
 
 ```bash
-# Seed 3 placeholder scholarly manuscripts
+# Seed the catalog: 3 manuscripts by D'Vaughn House
 php artisan db:seed
 
 # Build frontend assets
@@ -212,7 +212,7 @@ php artisan serve
 Visit:
 - **Checkout:** `http://localhost:8000/` (or `http://localhost:8000/checkout`)
 - **License Lookup:** `http://localhost:8000/lookup`
-- **Scholar Portfolio:** `http://localhost:8000/scholar/0x5C10a12345678901234567890123456789012345`
+- **Scholar Portfolio:** `http://localhost:8000/scholar/0x2c432c901d5844431b027dd652fbfd3cc3dd6094` (D'Vaughn House — both of his manuscripts land here)
 
 ---
 
