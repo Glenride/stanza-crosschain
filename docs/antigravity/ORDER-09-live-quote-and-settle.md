@@ -54,9 +54,17 @@ Implement the production path, no stubs, no simulated hashes:
 1. Build the unsigned EIP-1559 `recordLicense(buyer, workId, tier, proofHash)`
    transaction for the deployed registry (use the existing
    `encodeRecordLicenseCall`; selector `0x48967ddc`).
-2. Hash the payload and call the NEAR Chain Signatures contract `sign`
-   (`v1.signer`, mainnet) with path `ethereum-1`.
-3. Assemble the signed transaction and relay it to Base (chain 8453).
+2. Hash the payload (keccak256 of the EIP-1559 signing payload) and call the
+   NEAR Chain Signatures contract `sign` (`v1.signer`, mainnet). Verified
+   2026-11-07 against the contract API: `sign(request)` takes
+   `{payload: [u8; 32], path: String, key_version: u32}` — path `ethereum-1`,
+   `key_version: 0` (currently the only valid version) — and returns
+   `{big_r, s, recovery_id}`. A small per-signature deposit is required (fee
+   varies with load; query the live `experimantal_signature_deposit()` view —
+   do not hardcode the fee). Attach ~300 TGas. The caller's NEAR account pays
+   gas + deposit, so the account needs a NEAR balance for both.
+3. Assemble the signed transaction (r from `big_r`, s from `s`, `recovery_id`
+   as the EIP-1559 `yParity`) and relay it to Base (chain 8453).
 4. Wait for the receipt, verify the `LicenseRecorded` event, return
    `txHash` / `blockNumber` / `relayedViaMpc: true` / `isStub: false`.
 
