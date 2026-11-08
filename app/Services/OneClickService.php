@@ -97,7 +97,7 @@ class OneClickService
     protected function getStubQuote(array $params): array
     {
         $depositAsset = $params['originAsset'] ?? 'nep141:wrap.near';
-        $destinationAsset = $params['destinationAsset'] ?? 'erc20:base:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
+        $destinationAsset = $params['destinationAsset'] ?? 'nep141:base-0x833589fcd6edb6e08f4c7c32d4f71b54bda02913.omft.near';
         $amountIn = $params['amount'] ?? '5000000';
         $amountOut = $params['amountOut'] ?? $amountIn;
         $recipient = $params['recipient'] ?? '0x5C10a12345678901234567890123456789012345';

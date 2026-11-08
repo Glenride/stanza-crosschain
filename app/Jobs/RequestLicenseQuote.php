@@ -33,7 +33,7 @@ class RequestLicenseQuote implements ShouldQueue
         $params = [
             'swapType' => 'EXACT_OUTPUT',
             'originAsset' => $this->license->deposit_asset ?? 'nep141:wrap.near',
-            'destinationAsset' => 'erc20:base:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', // USDC Base
+            'destinationAsset' => 'nep141:base-0x833589fcd6edb6e08f4c7c32d4f71b54bda02913.omft.near', // USDC Base (verified against live /v0/tokens 2026-11-07)
             'amount' => $amountUnits,
             'recipient' => $work->scholar_address,
             'refundTo' => $this->license->buyer_address,

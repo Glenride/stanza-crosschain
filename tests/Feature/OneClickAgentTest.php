@@ -45,7 +45,7 @@ class OneClickAgentTest extends TestCase
         $service = new OneClickService();
         $quote = $service->requestQuote([
             'originAsset' => 'nep141:wrap.near',
-            'destinationAsset' => 'erc20:base:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
+            'destinationAsset' => 'nep141:base-0x833589fcd6edb6e08f4c7c32d4f71b54bda02913.omft.near',
             'amount' => '5000000',
             'recipient' => $this->work->scholar_address,
             'refundTo' => $this->work->scholar_address,
