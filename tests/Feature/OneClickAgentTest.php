@@ -46,13 +46,15 @@ class OneClickAgentTest extends TestCase
     {
         $service = new OneClickService();
         $quote = $service->requestQuote([
-            'originAsset' => 'nep141:wrap.near',
+            'originAsset' => 'nep141:base.omft.near',
             'destinationAsset' => 'nep141:base-0x833589fcd6edb6e08f4c7c32d4f71b54bda02913.omft.near',
             'amount' => '5000000',
             'recipient' => $this->work->scholar_address,
             'refundTo' => $this->work->scholar_address,
             'dry' => false,
             // Required by the current 1Click API (verified 2026-11-07).
+            // Origin is an EVM asset (ETH on Base) so the EVM refundTo is valid;
+            // a NEAR origin would need a NEAR refund address instead.
             'swapType' => 'EXACT_OUTPUT',
             'slippageTolerance' => 100,
             'depositType' => 'ORIGIN_CHAIN',
@@ -72,11 +74,13 @@ class OneClickAgentTest extends TestCase
     {
         $license = License::create([
             'work_id' => $this->work->id,
-            'buyer_address' => '0xB001234567890123456789012345678901234567',
+            'buyer_address' => '0xc09ae916febb1d51de1a6eb5f4353ae48c348f84',
             'tier' => 'read',
             'price_usd' => 5.00,
-            'deposit_asset' => 'nep141:wrap.near',
-            'deposit_chain' => 'near',
+            // EVM origin (ETH on Base): the job refunds to the EVM buyer address,
+            // which the live API only accepts when the origin is EVM.
+            'deposit_asset' => 'nep141:base.omft.near',
+            'deposit_chain' => 'base',
             'status' => 'pending',
         ]);
 

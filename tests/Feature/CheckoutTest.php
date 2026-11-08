@@ -23,7 +23,8 @@ class CheckoutTest extends TestCase
             'title' => 'Cross-Chain Cryptographic Settlement in Scholarly Publishing',
             'slug' => 'cross-chain-settlement',
             'scholar_name' => 'Dr. Jane Scholar',
-            'scholar_address' => '0x5C10a12345678901234567890123456789012345',
+            // Real, valid recipient: the live 1Click API checksum-validates it.
+            'scholar_address' => '0x2c432c901d5844431b027dd652fbfd3cc3dd6094',
             'metadata_uri' => 'ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi',
             'description' => 'A decentralized peer-reviewed manuscript on cross-chain licensing.',
             'tiers' => [
@@ -59,9 +60,11 @@ class CheckoutTest extends TestCase
         $payload = [
             'work_id' => $this->work->id,
             'tier' => 'read',
-            'buyer_address' => '0xB001234567890123456789012345678901234567',
-            'deposit_asset' => 'nep141:wrap.near',
-            'deposit_chain' => 'near',
+            'buyer_address' => '0xc09ae916febb1d51de1a6eb5f4353ae48c348f84',
+            // EVM origin (ETH on Base): the job refunds to the EVM buyer address,
+            // which the live API only accepts when the origin is EVM.
+            'deposit_asset' => 'nep141:base.omft.near',
+            'deposit_chain' => 'base',
         ];
 
         $response = $this->postJson('/api/quote', $payload);
@@ -85,7 +88,7 @@ class CheckoutTest extends TestCase
         $this->assertDatabaseHas('licenses', [
             'work_id' => $this->work->id,
             'tier' => 'read',
-            'buyer_address' => '0xB001234567890123456789012345678901234567',
+            'buyer_address' => '0xc09ae916febb1d51de1a6eb5f4353ae48c348f84',
         ]);
     }
 
