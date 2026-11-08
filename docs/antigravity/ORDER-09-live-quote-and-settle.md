@@ -21,31 +21,26 @@
   deployed address, saw 3 test failures, and reverted it to `stub` — the failures
   turned out to be the 1Click quote payload (below), NOT the registry address.
   This order sets it to the deployed address as its final step.
-- Test suite right now: 11 passed, 3 failed (the 3 are the 1Click quote / job-chain
-  tests). They now exercise the LIVE 1Click API because the JWT is present; they
-  passed before only in stub mode.
+- Test suite right now: **14 passed, 0 failed** (verified 2026-11-07 ~19:15 ET).
+  Janine fixed the quote leg directly (commits `83d8240`, `a246670`, `b33703e`,
+  `2fc3d17`, `c0dd25d`): required 1Click fields, live `nep141` asset IDs from
+  `/v0/tokens`, EVM-origin deposits with valid addresses, and normalization of
+  the live quote/status responses into the flat shape the jobs expect. The live
+  quote returns a real deposit address; the live status returns
+  `PENDING_DEPOSIT` for an unpaid quote. The job-chain test runs on the stub
+  service by design (a live quote has no deposit, so WatchSettlement would
+  requeue forever) — live quote coverage is the direct service test.
+- Task 1 below is DONE. What remains is Task 2 (live MPC settle), Task 3, and
+  the report. **Known limitation (flagged, not fixed):** a NEAR-origin deposit
+  cannot be quoted — the job refunds to the EVM buyer address, and the live API
+  only accepts a NEAR refund address for a NEAR origin. The demo pays from an
+  EVM chain, so this does not block Monday; it needs a checkout change (collect
+  the buyer's NEAR account) before NEAR-origin purchases are offered.
 
-## Task 1 — Fix the 1Click quote payload to the current API
+## Task 1 — Fix the 1Click quote payload to the current API — DONE (Janine, 2026-11-07)
 
-The live API (`POST https://1click.chaindefuser.com/v0/quote`) returned 400 on
-2026-11-07 ~19:03 ET. Verbatim requirements from its errors:
-
-- Required and missing: `dry` (boolean), `swapType` (EXACT_INPUT, EXACT_OUTPUT,
-  FLEX_INPUT, ANY_INPUT), `slippageTolerance` (integer 0–10000),
-  `depositType` (ORIGIN_CHAIN, INTENTS, CONFIDENTIAL_INTENTS), `refundTo` (string),
-  `refundType` (ORIGIN_CHAIN, INTENTS, CONFIDENTIAL_INTENTS),
-  `recipientType` (DESTINATION_CHAIN, INTENTS, CONFIDENTIAL_INTENTS),
-  `deadline` (valid ISO 8601 date string).
-- Rejected: `amountOut` — "property amountOut should not exist".
-
-Fix `app/Jobs/RequestLicenseQuote.php` (it currently sends `swapType`,
-`originAsset`, `destinationAsset`, `amount`, `amountOut`, `recipient`,
-`refundTo`, `dry`) and the direct-service call in
-`tests/Feature/OneClickAgentTest.php` (it sends only `originAsset`,
-`destinationAsset`, `amount`, `recipient`) to send the full required payload.
-Remove `amountOut`. Keep the job's intent: EXACT_OUTPUT for the tier price in
-micro-units. Do not change the destination asset (USDC on Base,
-`0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`) or the recipient (scholar address).
+Verified 14/14 green. Do not redo it; if a quote regresses, the fix history is
+commits `83d8240`, `a246670`, `b33703e`, `2fc3d17`, `c0dd25d`.
 
 ## Task 2 — Implement the live MPC settlement path
 
@@ -66,10 +61,17 @@ Implement the production path, no stubs, no simulated hashes:
    `txHash` / `blockNumber` / `relayedViaMpc: true` / `isStub: false`.
 
 NEAR credentials: use the app's NEAR account (`stanza_glenride.near`) and
-whatever function-call key the app already has configured. Check `.env` for
-what is present; NEVER print a key or seed. If the signing key the MPC call
-needs is missing, STOP and report exactly which credential is missing — do
-not stub around it and do not invent one.
+whatever function-call key the app already has configured. **Inventory as of
+2026-11-07 (Janine): there is NO signing key on file.** `.env` has
+`NEAR_ACCOUNT_ID` but its value is EMPTY; there is no `NEAR_PRIVATE_KEY` (or
+any signer/function-call key), no `~/.near-credentials` on the iMac, no NEAR
+package in `composer.json`, and no signing code anywhere in the app. PHP on the
+iMac has `sodium` (ed25519) and `bcmath` available, `gmp` is not installed.
+Check `.env` for what is present; NEVER print a key or seed. **If the signing
+key the MPC call needs is missing, STOP and report exactly which credential is
+missing and the exact steps for D'Vaughn to create it** (a function-call key
+for `stanza_glenride.near`, made from his seed phrase, which is on paper
+offline) — do not stub around it and do not invent one.
 
 ## Task 3 — Go live in config and verify
 

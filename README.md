@@ -75,9 +75,9 @@ sequenceDiagram
 
 | Network | Contract / Asset | Address | Details |
 | :--- | :--- | :--- | :--- |
-| **Base Mainnet (8453)** | `LicenseRegistry.sol` | *Deploy Block: Fri Nov 6* | [LicenseRegistry.sol](src/LicenseRegistry.sol) |
+| **Base Mainnet (8453)** | `LicenseRegistry.sol` | [`0x3407bBf34488AC73B85B7f32463b1913Fcf9eA00`](https://basescan.org/address/0x3407bBf34488AC73B85B7f32463b1913Fcf9eA00) | Deployed Sat Nov 7, 2026. Deploy tx [`0xf2769b808992a69969a5909e1b5359cfc375a6400092e546845b2639695d4065`](https://basescan.org/tx/0xf2769b808992a69969a5909e1b5359cfc375a6400092e546845b2639695d4065). Relayer (immutable): `0x4D538abf011e0885a6f87667Db466837B10b49f9`. [LicenseRegistry.sol](src/LicenseRegistry.sol) |
 | **NEAR Mainnet** | MPC Signer Contract | `v1.signer` | Root key: `3tFRbM...` |
-| **Derivation Path** | MPC Path | `ethereum-1` | Relayer EVM Address |
+| **Derivation Path** | MPC Path | `ethereum-1` | Relayer EVM Address `0x4D538abf011e0885a6f87667Db466837B10b49f9` (`stanza_glenride.near`) |
 | **Base USDC** | Settlement Asset | `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913` | Direct scholar proceeds |
 
 ---
