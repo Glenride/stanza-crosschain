@@ -49,7 +49,43 @@ class OneClickService
             throw new Exception("1Click API quote error ({$response->status()}): {$response->body()}");
         }
 
-        return $response->json();
+        return $this->normalizeQuoteResponse($response->json(), $params);
+    }
+
+    /**
+     * Normalize the live 1Click quote into the flat shape the jobs expect.
+     * Live API (verified 2026-11-07) returns {correlationId, quote: {...},
+     * quoteRequest, signature, timestamp} — no top-level quoteId/depositAddress.
+     */
+    protected function normalizeQuoteResponse(array $json, array $params): array
+    {
+        if (!isset($json['quote']) || !is_array($json['quote'])) {
+            return $json;
+        }
+
+        $quote = $json['quote'];
+        $request = $json['quoteRequest'] ?? [];
+
+        return [
+            'quoteId' => $json['correlationId'] ?? null,
+            'depositAddress' => $quote['depositAddress'] ?? null,
+            'originAsset' => $request['originAsset'] ?? $params['originAsset'] ?? null,
+            'destinationAsset' => $request['destinationAsset'] ?? $params['destinationAsset'] ?? null,
+            'amount' => $request['amount'] ?? $params['amount'] ?? null,
+            'amountIn' => $quote['amountIn'] ?? null,
+            'amountInFormatted' => $quote['amountInFormatted'] ?? null,
+            'amountInUsd' => $quote['amountInUsd'] ?? null,
+            'amountOut' => $quote['amountOut'] ?? null,
+            'amountOutFormatted' => $quote['amountOutFormatted'] ?? null,
+            'amountOutUsd' => $quote['amountOutUsd'] ?? null,
+            'recipient' => $request['recipient'] ?? $params['recipient'] ?? null,
+            'refundTo' => $request['refundTo'] ?? $params['refundTo'] ?? null,
+            'deadline' => $quote['deadline'] ?? null,
+            'timeEstimate' => $quote['timeEstimate'] ?? null,
+            'status' => 'PENDING_DEPOSIT',
+            'isStub' => false,
+            'raw' => $json,
+        ];
     }
 
     /**
@@ -88,7 +124,35 @@ class OneClickService
             throw new Exception("1Click API status error ({$response->status()}): {$response->body()}");
         }
 
-        return $response->json();
+        return $this->normalizeStatusResponse($response->json(), $depositAddress);
+    }
+
+    /**
+     * Normalize the live 1Click status into the flat shape the jobs expect.
+     * Live API (verified 2026-11-07) returns {status, swapDetails: {...},
+     * quoteResponse, correlationId, updatedAt} — tx hashes live in
+     * swapDetails.originChainTxHashes / destinationChainTxHashes.
+     */
+    protected function normalizeStatusResponse(array $json, string $depositAddress): array
+    {
+        if (!isset($json['swapDetails']) || !is_array($json['swapDetails'])) {
+            return $json;
+        }
+
+        $details = $json['swapDetails'];
+
+        return [
+            'status' => $json['status'] ?? 'PENDING',
+            'depositAddress' => $depositAddress,
+            'depositTxHash' => $details['originChainTxHashes'][0] ?? null,
+            'settledTxHash' => $details['destinationChainTxHashes'][0] ?? null,
+            'amountIn' => $details['amountIn'] ?? null,
+            'amountOut' => $details['amountOut'] ?? null,
+            'amountInUsd' => $details['amountInUsd'] ?? null,
+            'amountOutUsd' => $details['amountOutUsd'] ?? null,
+            'isStub' => false,
+            'raw' => $json,
+        ];
     }
 
     /**

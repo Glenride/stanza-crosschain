@@ -65,9 +65,12 @@ class OneClickAgentTest extends TestCase
 
         $this->assertNotEmpty($quote['depositAddress']);
         $this->assertNotEmpty($quote['quoteId']);
+        $this->assertEquals('5000000', (string) $quote['amountOut']);
 
+        // A fresh live quote has no deposit yet, so the live status is
+        // PENDING_DEPOSIT (the stub used to return SUCCESS here).
         $status = $service->getStatus($quote['depositAddress']);
-        $this->assertEquals('SUCCESS', $status['status']);
+        $this->assertEquals('PENDING_DEPOSIT', $status['status']);
     }
 
     public function test_end_to_end_job_chain_runs_cleanly(): void
@@ -84,8 +87,13 @@ class OneClickAgentTest extends TestCase
             'status' => 'pending',
         ]);
 
-        $oneClick = new OneClickService();
+        $oneClick = new OneClickService(null, 'stub');
         $mpcService = new MpcSettlementService();
+
+        // The job chain runs on the stub service: a live quote has no deposit,
+        // so WatchSettlement would see PENDING_DEPOSIT and requeue forever.
+        // Live quote coverage lives in test_oneclick_service_generates_quote_and_status.
+        $this->app->bind(OneClickService::class, fn () => new OneClickService(null, 'stub'));
 
         // When queue driver is sync, dispatching RequestLicenseQuote triggers
         // the entire job chain: RequestLicenseQuote -> WatchSettlement -> SettleLicense
