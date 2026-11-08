@@ -29,7 +29,9 @@ class OneClickAgentTest extends TestCase
             'title' => 'Decentralized Academic Attribution',
             'slug' => 'decentralized-academic-attribution',
             'scholar_name' => 'Prof. Alistair Finch',
-            'scholar_address' => '0x5C10a12345678901234567890123456789012345',
+            // Real, valid recipient: the live 1Click API checksum-validates the
+            // recipient, and the old placeholder address was rejected.
+            'scholar_address' => '0x2c432c901d5844431b027dd652fbfd3cc3dd6094',
             'metadata_uri' => 'ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi',
             'tiers' => [
                 'read' => 5.00,
