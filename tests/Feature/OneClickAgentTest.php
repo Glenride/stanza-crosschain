@@ -48,6 +48,15 @@ class OneClickAgentTest extends TestCase
             'destinationAsset' => 'erc20:base:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
             'amount' => '5000000',
             'recipient' => $this->work->scholar_address,
+            'refundTo' => $this->work->scholar_address,
+            'dry' => false,
+            // Required by the current 1Click API (verified 2026-11-07).
+            'swapType' => 'EXACT_OUTPUT',
+            'slippageTolerance' => 100,
+            'depositType' => 'ORIGIN_CHAIN',
+            'refundType' => 'ORIGIN_CHAIN',
+            'recipientType' => 'DESTINATION_CHAIN',
+            'deadline' => date('c', time() + 1800),
         ]);
 
         $this->assertNotEmpty($quote['depositAddress']);

@@ -35,10 +35,16 @@ class RequestLicenseQuote implements ShouldQueue
             'originAsset' => $this->license->deposit_asset ?? 'nep141:wrap.near',
             'destinationAsset' => 'erc20:base:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', // USDC Base
             'amount' => $amountUnits,
-            'amountOut' => $amountUnits,
             'recipient' => $work->scholar_address,
             'refundTo' => $this->license->buyer_address,
             'dry' => false,
+            // Required by the current 1Click API (verified 2026-11-07: 400 without them;
+            // `amountOut` is rejected — "property amountOut should not exist").
+            'slippageTolerance' => 100,
+            'depositType' => 'ORIGIN_CHAIN',
+            'refundType' => 'ORIGIN_CHAIN',
+            'recipientType' => 'DESTINATION_CHAIN',
+            'deadline' => now()->addMinutes(30)->toIso8601String(),
         ];
 
         Log::info("Requesting 1Click quote for License #{$this->license->id}", $params);
