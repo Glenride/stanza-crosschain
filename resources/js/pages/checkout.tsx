@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface Work {
     id: number;
@@ -18,10 +18,19 @@ interface License {
     buyer_address: string;
     tier: string;
     price_usd: number;
+    payment_method?: string;
     deposit_asset: string;
     deposit_chain: string;
     deposit_address: string | null;
     quote_id: string | null;
+    paypal_order_id?: string | null;
+    paypal_authorization_id?: string | null;
+    paypal_capture_id?: string | null;
+    attestation_payload?: {
+        decision?: string;
+        mode?: string;
+        rationale?: string;
+    } | null;
     deposit_tx_hash: string | null;
     proof_hash: string | null;
     settlement_tx_hash: string | null;
@@ -32,6 +41,7 @@ interface License {
 
 interface Props {
     works: Work[];
+    returnLicenseId?: number;
 }
 
 const DEPOSIT_CHAINS = [
@@ -41,15 +51,28 @@ const DEPOSIT_CHAINS = [
     { id: 'arbitrum', name: 'Arbitrum', asset: 'arbitrum:native', symbol: 'ETH' },
 ];
 
-export default function Checkout({ works }: Props) {
+export default function Checkout({ works, returnLicenseId }: Props) {
     const [selectedWorkId, setSelectedWorkId] = useState<number>(works[0]?.id || 1);
     const [selectedTier, setSelectedTier] = useState<string>('read');
     const [selectedChain, setSelectedChain] = useState(DEPOSIT_CHAINS[0]);
+    const [paymentMethod, setPaymentMethod] = useState<'oneclick' | 'paypal'>('oneclick');
     const [buyerAddress, setBuyerAddress] = useState<string>('0xB001234567890123456789012345678901234567');
     const [loading, setLoading] = useState<boolean>(false);
     const [currentLicense, setCurrentLicense] = useState<License | null>(null);
     const [copied, setCopied] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
+
+    // Coming back from PayPal approval: load the license the return
+    // route authorized (or failed) so the status card shows what happened.
+    useEffect(() => {
+        if (!returnLicenseId) return;
+        fetch(`/api/licenses/${returnLicenseId}`, { headers: { Accept: 'application/json' } })
+            .then((res) => (res.ok ? res.json() : null))
+            .then((data) => {
+                if (data?.license) setCurrentLicense(data.license);
+            })
+            .catch(() => undefined);
+    }, [returnLicenseId]);
 
     const activeWork = works.find((w) => w.id === selectedWorkId) || works[0];
     const currentPrice = activeWork?.tiers[selectedTier] || 5.0;
@@ -86,6 +109,48 @@ export default function Checkout({ works }: Props) {
             setCurrentLicense(data.license);
         } catch (err: any) {
             setError(err.message || 'An error occurred generating the 1Click quote.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handlePayPalCheckout = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setError(null);
+
+        try {
+            const csrfToken = (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content;
+
+            const res = await fetch('/api/paypal/order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken || '',
+                    Accept: 'application/json',
+                },
+                body: JSON.stringify({
+                    work_id: activeWork.id,
+                    tier: selectedTier,
+                    buyer_address: buyerAddress,
+                }),
+            });
+
+            const data = await res.json();
+            if (!res.ok) {
+                throw new Error(
+                    data.error === 'paypal_not_configured'
+                        ? 'PayPal checkout is not online yet (sandbox credentials are not configured).'
+                        : data.message || 'Failed to create the PayPal order.',
+                );
+            }
+
+            // PayPal approval happens on PayPal (sandbox). The buyer comes
+            // back to /paypal/return, where the payment is authorized (held)
+            // and the attestation agent decides whether to capture it.
+            window.location.href = data.approve_url;
+        } catch (err: any) {
+            setError(err.message || 'An error occurred starting PayPal checkout.');
         } finally {
             setLoading(false);
         }
@@ -231,11 +296,42 @@ export default function Checkout({ works }: Props) {
                                 </div>
                             </div>
 
-                            {/* Step 3: Payment Origin Chain */}
+                            {/* Step 3: Payment Method */}
                             <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-5 sm:p-6 shadow-sm">
                                 <label className="block text-xs font-mono uppercase tracking-wider text-neutral-400 mb-3">
-                                    3. Pay From Origin Chain (1Click Deposit)
+                                    3. Choose How to Pay
                                 </label>
+                                <div className="grid grid-cols-2 gap-2 mb-4">
+                                    <button
+                                        type="button"
+                                        onClick={() => setPaymentMethod('oneclick')}
+                                        className={`rounded-lg p-2.5 text-center border transition ${
+                                            paymentMethod === 'oneclick'
+                                                ? 'border-emerald-500 bg-neutral-800 text-white'
+                                                : 'border-neutral-800 bg-neutral-950/40 text-neutral-400 hover:border-neutral-700'
+                                        }`}
+                                    >
+                                        <div className="text-xs font-medium">Crypto (1Click)</div>
+                                        <div className="text-[11px] font-mono text-emerald-400 mt-0.5">
+                                            NEAR · SOL · EVM
+                                        </div>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setPaymentMethod('paypal')}
+                                        className={`rounded-lg p-2.5 text-center border transition ${
+                                            paymentMethod === 'paypal'
+                                                ? 'border-emerald-500 bg-neutral-800 text-white'
+                                                : 'border-neutral-800 bg-neutral-950/40 text-neutral-400 hover:border-neutral-700'
+                                        }`}
+                                    >
+                                        <div className="text-xs font-medium">PayPal (Sandbox)</div>
+                                        <div className="text-[11px] font-mono text-emerald-400 mt-0.5">
+                                            Held until attested
+                                        </div>
+                                    </button>
+                                </div>
+                                {paymentMethod === 'oneclick' && (
                                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                                     {DEPOSIT_CHAINS.map((chain) => {
                                         const isSelected = selectedChain.id === chain.id;
@@ -258,6 +354,7 @@ export default function Checkout({ works }: Props) {
                                         );
                                     })}
                                 </div>
+                                )}
 
                                 <div className="mt-4">
                                     <label className="block text-xs font-mono text-neutral-400 mb-1">
@@ -276,18 +373,40 @@ export default function Checkout({ works }: Props) {
                                     </p>
                                 </div>
 
-                                <button
-                                    type="button"
-                                    onClick={handleCreateQuote}
-                                    disabled={loading}
-                                    className="mt-5 w-full py-3 px-4 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-neutral-950 font-semibold text-sm transition flex items-center justify-center gap-2 disabled:opacity-50"
-                                >
-                                    {loading ? (
-                                        <span>Generating 1Click Quote...</span>
-                                    ) : (
-                                        <span>Get Deposit Address (${currentPrice.toFixed(2)} USD)</span>
-                                    )}
-                                </button>
+                                {paymentMethod === 'oneclick' ? (
+                                    <button
+                                        type="button"
+                                        onClick={handleCreateQuote}
+                                        disabled={loading}
+                                        className="mt-5 w-full py-3 px-4 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-neutral-950 font-semibold text-sm transition flex items-center justify-center gap-2 disabled:opacity-50"
+                                    >
+                                        {loading ? (
+                                            <span>Generating 1Click Quote...</span>
+                                        ) : (
+                                            <span>Get Deposit Address (${currentPrice.toFixed(2)} USD)</span>
+                                        )}
+                                    </button>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={handlePayPalCheckout}
+                                        disabled={loading}
+                                        className="mt-5 w-full py-3 px-4 rounded-lg bg-[#ffc439] hover:bg-[#ffce5e] text-[#003087] font-semibold text-sm transition flex items-center justify-center gap-2 disabled:opacity-50"
+                                    >
+                                        {loading ? (
+                                            <span>Starting PayPal checkout...</span>
+                                        ) : (
+                                            <span>Continue with PayPal — ${currentPrice.toFixed(2)} USD (Sandbox)</span>
+                                        )}
+                                    </button>
+                                )}
+                                {paymentMethod === 'paypal' && (
+                                    <p className="text-[11px] text-neutral-500 mt-2">
+                                        PayPal holds the payment — it is only captured after the
+                                        licensing agent attests the license. If the attestation
+                                        fails, the hold is voided and you are never charged.
+                                    </p>
+                                )}
                             </div>
                         </div>
 
@@ -378,6 +497,36 @@ export default function Checkout({ works }: Props) {
                                                 <span className="text-neutral-500">Signing Authority:</span>
                                                 <span className="text-neutral-200">NEAR MPC (path ethereum-1)</span>
                                             </div>
+                                            {currentLicense.payment_method === 'paypal' && (
+                                                <>
+                                                    <div className="flex justify-between">
+                                                        <span className="text-neutral-500">Payment:</span>
+                                                        <span className="text-neutral-200">PayPal Sandbox (held)</span>
+                                                    </div>
+                                                    {currentLicense.paypal_order_id && (
+                                                        <div className="flex justify-between">
+                                                            <span className="text-neutral-500">PayPal Order:</span>
+                                                            <span className="text-neutral-200 truncate max-w-[180px]">
+                                                                {currentLicense.paypal_order_id}
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                                    {currentLicense.attestation_payload && (
+                                                        <div className="flex justify-between">
+                                                            <span className="text-neutral-500">Attestation:</span>
+                                                            <span className="text-emerald-400 uppercase font-semibold">
+                                                                {currentLicense.attestation_payload.decision} ·{' '}
+                                                                {currentLicense.attestation_payload.mode}
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                                    {currentLicense.attestation_payload?.rationale && (
+                                                        <div className="text-[11px] text-neutral-400 leading-snug">
+                                                            {currentLicense.attestation_payload.rationale}
+                                                        </div>
+                                                    )}
+                                                </>
+                                            )}
                                         </div>
 
                                         {currentLicense.settlement_tx_hash && (
