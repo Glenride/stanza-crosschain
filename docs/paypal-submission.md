@@ -85,12 +85,17 @@ deterministic gates only and records that honestly.
 
 - Sandbox flow is built and feature-tested. The demo video shows the
   sandbox flow (sandbox buyer account, sandbox dollars — no real money).
-- Live on-chain settlement still needs the NEAR function-call key for
-  `stanza_glenride.near`, which only D'Vaughn can create from his paper
-  seed phrase. Until it exists, a captured payment parks as `captured`
-  with a plain note, and re-running the settle job finishes the on-chain
-  leg. The video says this plainly if the key is not in place by
-  recording time — no settlement is faked.
+- UPDATE Nov 9, 10:12 ET: the NEAR function-call key for
+  `stanza_glenride.near` now EXISTS and is verified on-chain
+  (ed25519:HJq3ADhCW31xb82sPu83k7DQixXavNzjgk7WhZmDAa1P, v1.signer,
+  method sign, 1 NEAR allowance, tx
+  9o4fXRcCKgiVQQrai4nu2hCXZWLxEppxfuYHZdqrhKci; .env NEAR_PRIVATE_KEY
+  matches it). What is still pending is Antigravity implementing the
+  live MPC settle (Order 9 Task 2, triggered 10:13). Until the settle
+  leg is implemented, a captured payment parks as `captured` with a
+  plain note, and re-running the settle job finishes the on-chain leg.
+  The video says this plainly if settlement is not live by recording
+  time — no settlement is faked.
 
 ## Demo video script (< 3 minutes — DO NOT record or publish; D'Vaughn's step)
 
@@ -134,12 +139,12 @@ Screen recording, live app + PayPal Sandbox. Total target 2:30.
 3. **AI key (optional but recommended):** set `AI_API_KEY` in the iMac app
    `.env` so the demo shows the LLM attestation review live. Without it
    the agent runs deterministic gates only (and says so).
-4. **NEAR function-call key (only if the demo must show live MPC
-   settlement):** create a function-call key for `stanza_glenride.near`
-   from his paper seed phrase, restricted to calling the MPC contract.
-   Do NOT share the seed phrase with anyone, including Janine. If the key
-   is not ready by recording time, record beats 1–4 + the capture, and
-   say plainly the settlement lands next.
+4. **NEAR function-call key — DONE Nov 9, 10:12 ET:** the key for
+   `stanza_glenride.near` is created and verified on-chain (see Honest
+   status above). No action needed from him on the key. What remains is
+   Antigravity's live MPC settle implementation (Order 9 Task 2). If
+   settlement is not live by recording time, record beats 1–4 + the
+   capture, and say plainly the settlement lands next.
 5. **Record + upload the demo video** (< 3 min, public on YouTube) using
    the script above. Post it only when ready.
 6. **Submit on Devpost** before Thu Nov 12, 12:00 PM PT (3:00 PM ET).
