@@ -149,18 +149,22 @@ class PayPalCheckoutTest extends TestCase
 
     public function test_paypal_amount_mismatch_voids_and_fails_without_capture(): void
     {
-        $license = $this->createPayPalLicense();
-
-        // Re-fake with a mismatched authorized amount for the settle step.
+        // Build the authorized license directly: the PayPal fake is
+        // registered once, with a mismatched authorized amount (999.00 vs
+        // the $10.00 read tier). (Re-registering Http::fake would NOT take
+        // effect — the first matching stub wins — so the mismatch must be
+        // in place before the job runs.)
         $this->fakePayPal('999.00');
 
-        // Dispatch the settle job directly (the return route already ran the
-        // job once under the matching fake; reset the license first).
-        $license->update([
-            'status' => 'authorized',
+        $license = License::create([
+            'work_id' => $this->work->id,
+            'buyer_address' => '0xc09ae916febb1d51de1a6eb5f4353ae48c348f84',
+            'tier' => 'read',
+            'price_usd' => 10.00,
+            'payment_method' => 'paypal',
+            'paypal_order_id' => 'ORDER-123',
             'paypal_authorization_id' => 'AUTH-1',
-            'paypal_capture_id' => null,
-            'attestation_payload' => null,
+            'status' => 'authorized',
         ]);
 
         (new SettlePayPalLicense($license))->handle(
