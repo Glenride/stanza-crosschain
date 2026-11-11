@@ -24,7 +24,7 @@ records the license on-chain, with no EVM private key anywhere in the loop.
 This slice adds the payment rail most readers actually have — PayPal — and
 makes the trust model explicit:
 
-1. The reader picks a manuscript and a tier (read $10 / citation $25 /
+1. The reader picks a manuscript and a tier (read $1 / citation $25 /
    commercial $150) and pays with PayPal (Sandbox). The app creates a PayPal
    order with intent AUTHORIZE.
 2. The reader approves on PayPal. The app authorizes the order — PayPal
@@ -85,17 +85,14 @@ deterministic gates only and records that honestly.
 
 - Sandbox flow is built and feature-tested. The demo video shows the
   sandbox flow (sandbox buyer account, sandbox dollars — no real money).
-- UPDATE Nov 9, 10:12 ET: the NEAR function-call key for
-  `stanza_glenride.near` now EXISTS and is verified on-chain
-  (ed25519:HJq3ADhCW31xb82sPu83k7DQixXavNzjgk7WhZmDAa1P, v1.signer,
-  method sign, 1 NEAR allowance, tx
-  9o4fXRcCKgiVQQrai4nu2hCXZWLxEppxfuYHZdqrhKci; .env NEAR_PRIVATE_KEY
-  matches it). What is still pending is Antigravity implementing the
-  live MPC settle (Order 9 Task 2, triggered 10:13). Until the settle
-  leg is implemented, a captured payment parks as `captured` with a
-  plain note, and re-running the settle job finishes the on-chain leg.
-  The video says this plainly if settlement is not live by recording
-  time — no settlement is faked.
+- UPDATE Nov 10, 21:30 ET: live catalog read tier is $1 (verified in the
+  iMac SQLite DB — all 3 works {"read":1,"citation":25,"commercial":150});
+  the submission text and video script above now say $1. Note: the seeder
+  file still says $10 — a re-seed would revert the price; seeder update
+  pending his word. Settle leg: the live path is wired
+  (scripts/mpc-settle.cjs present and parses, LICENSE_REGISTRY_ADDRESS +
+  NEAR_PRIVATE_KEY set) but has NEVER run live — relayer nonce still 0 as
+  of Nov 10 21:30 ET. Beat 5 says so plainly; do not fake settlement.
 
 ## Demo video script (< 3 minutes — DO NOT record or publish; D'Vaughn's step)
 
@@ -106,12 +103,12 @@ Screen recording, live app + PayPal Sandbox. Total target 2:30.
   attestation agent checks the license before a cent moves. Then the
   license is recorded on Base." Show the checkout page, PayPal toggle.
 - **Beat 2 (0:20–0:50) — Pick a license.** Open the Quadratic Funding
-  replication manuscript. Pick the $10 read tier. Enter the buyer EVM
+  replication manuscript. Pick the $1 read tier. Enter the buyer EVM
   address. "Same catalog, same tiers as the crypto checkout — a second
   rail, not a second product."
 - **Beat 3 (0:50–1:30) — PayPal hold.** Click "Continue with PayPal".
   Approve in the PayPal Sandbox (buyer test account). Come back: status
-  `authorized`. "PayPal is holding $10. Nothing has been captured."
+  `authorized`. "PayPal is holding $1. Nothing has been captured."
 - **Beat 4 (1:30–2:10) — Attestation.** Show the attestation verdict on
   the status card: deterministic gates + LLM review, decision RELEASE.
   "The agent checked the manuscript, the tier, and the amount — then it
