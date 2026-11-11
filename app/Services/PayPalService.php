@@ -46,7 +46,11 @@ class PayPalService
         $defaultBase = $mode === 'live'
             ? 'https://api-m.paypal.com'
             : 'https://api-m.sandbox.paypal.com';
-        $this->baseUrl = rtrim($baseUrl ?? config('services.paypal.base_url', env('PAYPAL_API_BASE', $defaultBase)), '/');
+        $resolvedBase = $baseUrl ?? config('services.paypal.base_url');
+        // config() returns null (not the default) when the key exists but
+        // PAYPAL_API_BASE is unset, so fall back explicitly — otherwise
+        // every PayPal URL is relative and Guzzle rejects it.
+        $this->baseUrl = rtrim($resolvedBase ?: $defaultBase, '/');
         $this->clientId = $clientId ?? config('services.paypal.client_id', env('PAYPAL_CLIENT_ID'));
         $this->clientSecret = $clientSecret ?? config('services.paypal.client_secret', env('PAYPAL_CLIENT_SECRET'));
     }
