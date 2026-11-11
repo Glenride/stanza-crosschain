@@ -333,13 +333,14 @@ instead of faking a success.
   (`tests/Feature/PayPalCheckoutTest.php`): order creation, return →
   authorize → capture → settle (stub MPC in tests), amount-mismatch void,
   LLM-hold void, duplicate-return idempotency.
-- The on-chain leg uses the same MPC settlement as the NEAR flow. Live MPC
-  settlement still needs the NEAR function-call key for
-  `stanza_glenride.near`, which only D'Vaughn can create from his seed
-  phrase. Until it exists, a captured PayPal payment parks as `captured`
-  with a plain-language note, and re-dispatching `SettlePayPalLicense`
-  finishes the on-chain leg — it never captures twice. No live paid
-  purchase has been run for this slice; sandbox only.
+- The on-chain leg uses the same MPC settlement as the NEAR flow. The NEAR
+  function-call key for `stanza_glenride.near` is created and verified
+  on-chain (Nov 9), and the live settle path is wired — but it has not run
+  a real settlement yet (relayer nonce still 0 as of Nov 10). Until it
+  does, a captured PayPal payment parks as `captured` with a
+  plain-language note, and re-dispatching `SettlePayPalLicense` finishes
+  the on-chain leg — it never captures twice. No live paid purchase has
+  been run for this slice; sandbox only.
 
 ## Submission & License
 
