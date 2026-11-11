@@ -121,6 +121,82 @@ Screen recording, live app + PayPal Sandbox. Total target 2:30.
   queued, nothing is faked." Close: "The scholar gets paid. The license
   is on-chain. The hold is what makes it trustworthy."
 
+## About — Devpost template (paste into the form)
+
+Written for a reader who has never heard of STANZA. The brand is introduced
+once, in plain language; the jargon stays in "How we built it".
+
+### Inspiration
+
+A scholar writes something worth paying for, and a reader wants to pay for
+it. There is no simple way for that to happen directly: publishers take the
+terms and the cut, and crypto-only licensing shuts out everyone who just
+has a PayPal account. And paying first means trusting a stranger. So the
+idea was to flip it: let the reader pay with the account they already have,
+hold the money until an AI checks that the license is real, and only then
+release it. STANZA is the name of the licensing system behind it — the
+thing that records the license on a public ledger once the payment clears,
+so the buyer can prove they hold it and the writer can prove they were
+paid.
+
+### What it does
+
+A reader picks a manuscript and a license tier — read $1, citation $25,
+commercial $150 — and pays with PayPal. PayPal holds the money; nothing is
+captured yet. An AI attestation agent checks the license: is the work real,
+does the tier price match the catalog, does the authorized amount match the
+price exactly, is the buyer address valid. If the check passes, the payment
+is released to the scholar and the license is recorded on Base, a public
+ledger. If it fails, the hold is voided and the buyer is never charged.
+
+### How we built it
+
+Laravel app with a PayPal Sandbox checkout (Orders API v2, intent
+AUTHORIZE) and a payment-method toggle on the checkout page. The attestation
+agent (`AttestationAgent`) runs deterministic gates plus, when configured,
+an LLM review of the manuscript record against the license terms
+(OpenAI-compatible chat completions). Settlement uses NEAR Chain Signatures
+(MPC) to record the license on Base through the LicenseRegistry contract —
+no EVM private key anywhere in the loop. Feature tests cover order creation,
+return → authorize → capture → settle, amount-mismatch void, LLM-hold void,
+and duplicate-return idempotency (6/6 passing).
+
+### Challenges we ran into
+
+PayPal's API base URL came back empty from config and the checkout died
+with a client error — fixed by falling back to the default sandbox URL.
+A live credential pair got pasted where the sandbox pair belonged; testing
+caught it (the live token worked, the sandbox one 401'd). Logging into
+PayPal Sandbox with the merchant account gets refused — the demo needs a
+Personal buyer test account. And the on-chain settlement leg is wired but
+hasn't run live yet (the relayer has never sent a transaction), so the demo
+says that plainly instead of faking a settlement.
+
+### Accomplishments that we're proud of
+
+The sandbox flow works end to end in the live demo: order created, buyer
+approves, PayPal holds $1, the attestation agent releases it, the capture
+lands, and the license status flips. The $1 read tier is verified in the
+live catalog, and the hold-until-attested flow — the actual trust model —
+is proven, not just described.
+
+### What we learned
+
+Holding money beats chasing it: authorize-then-capture turns a trust
+problem into a checkable step. Sandbox account roles matter — merchant and
+buyer are different accounts, and using the wrong one looks like a broken
+product. Config needs a fallback, or one missing variable kills the whole
+checkout. And an honest "not yet live" in a demo beats a faked settlement
+every time.
+
+### What's next for Stanza Cross Chain
+
+Run the settlement leg live: the first real $1 license recorded on Base.
+Then live PayPal credentials out of the sandbox, more manuscripts and
+tiers, and the same hold-until-attested pattern for other payment rails —
+so a reader can license a work from anywhere, with the payment method they
+already have.
+
 ## Steps only D'Vaughn can do
 
 1. **PayPal Developer sandbox credentials** (if not already created):
