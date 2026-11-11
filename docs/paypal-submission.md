@@ -128,8 +128,11 @@ once, in plain language; the jargon stays in "How we built it".
 
 ### Inspiration
 
-A scholar writes something worth paying for, and a reader wants to pay for
-it. There is no simple way for that to happen directly: publishers take the
+A scholar writes something worth paying for: a new chemo drug, a new
+public policy, or a threat to public health. A reader wants to pay for it:
+a tv producer, journalist, or student.
+
+There is no simple way for that to happen directly: publishers take the
 terms and the cut, and crypto-only licensing shuts out everyone who just
 has a PayPal account. And paying first means trusting a stranger. So the
 idea was to flip it: let the reader pay with the account they already have,
